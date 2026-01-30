@@ -115,6 +115,89 @@ class HapticsPatterns {
         return try generatePatternFromEvents(events: events)
     }
     
+    /// Creates a haptic pattern simulating a horse galloping - classic 4-beat rhythm with suspension
+    static func getHorseGallopPattern() throws -> CHHapticPattern {
+        var events: [CHHapticEvent] = []
+        var currentTime: TimeInterval = 0
+        
+        let gallopCycles = 12 // Number of full gallop cycles
+        
+        for _ in 0..<gallopCycles {
+            // A horse gallop has 4 beats + suspension phase
+            // Rhythm: da-da-da-DUM... (pause) da-da-da-DUM...
+            
+            // Beat 1: First back hoof (medium impact)
+            let beat1Intensity = CHHapticEventParameter(
+                parameterID: .hapticIntensity,
+                value: Float.random(in: 0.5...0.6)
+            )
+            let beat1Sharpness = CHHapticEventParameter(
+                parameterID: .hapticSharpness,
+                value: Float.random(in: 0.5...0.6)
+            )
+            let beat1 = CHHapticEvent(
+                eventType: .hapticTransient,
+                parameters: [beat1Intensity, beat1Sharpness],
+                relativeTime: currentTime
+            )
+            events.append(beat1)
+            
+            // Beat 2: Second back hoof (medium impact, quick follow)
+            let beat2Intensity = CHHapticEventParameter(
+                parameterID: .hapticIntensity,
+                value: Float.random(in: 0.45...0.55)
+            )
+            let beat2Sharpness = CHHapticEventParameter(
+                parameterID: .hapticSharpness,
+                value: Float.random(in: 0.5...0.6)
+            )
+            let beat2 = CHHapticEvent(
+                eventType: .hapticTransient,
+                parameters: [beat2Intensity, beat2Sharpness],
+                relativeTime: currentTime + 0.08
+            )
+            events.append(beat2)
+            
+            // Beat 3: First front hoof (slightly heavier)
+            let beat3Intensity = CHHapticEventParameter(
+                parameterID: .hapticIntensity,
+                value: Float.random(in: 0.55...0.65)
+            )
+            let beat3Sharpness = CHHapticEventParameter(
+                parameterID: .hapticSharpness,
+                value: Float.random(in: 0.55...0.65)
+            )
+            let beat3 = CHHapticEvent(
+                eventType: .hapticTransient,
+                parameters: [beat3Intensity, beat3Sharpness],
+                relativeTime: currentTime + 0.16
+            )
+            events.append(beat3)
+            
+            // Beat 4: Second front hoof - the "landing" (heaviest impact)
+            let beat4Intensity = CHHapticEventParameter(
+                parameterID: .hapticIntensity,
+                value: Float.random(in: 0.75...0.85)
+            )
+            let beat4Sharpness = CHHapticEventParameter(
+                parameterID: .hapticSharpness,
+                value: Float.random(in: 0.4...0.5) // Slightly duller for heavy landing
+            )
+            let beat4 = CHHapticEvent(
+                eventType: .hapticTransient,
+                parameters: [beat4Intensity, beat4Sharpness],
+                relativeTime: currentTime + 0.22
+            )
+            events.append(beat4)
+            
+            // Suspension phase - move to next cycle
+            // Full gallop cycle is ~0.4-0.5 seconds
+            currentTime += 0.45 + TimeInterval.random(in: -0.03...0.03)
+        }
+        
+        return try generatePatternFromEvents(events: events)
+    }
+    
     static func getHapticPlayerFromPattern(pattern: CHHapticPattern, engine: CHHapticEngine) throws -> CHHapticAdvancedPatternPlayer {
         let player = try engine.makeAdvancedPlayer(with: pattern)
         return player
