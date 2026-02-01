@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct TreadmillGameApp: App {
-    @StateObject var userInfoLogic = UserInfoLogic()
+    @StateObject var userInfoLogic = StartScreenController()
     var body: some Scene {
         WindowGroup {
             StartScreen()

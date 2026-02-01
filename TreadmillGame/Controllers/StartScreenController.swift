@@ -7,7 +7,7 @@
 
 import Foundation
 
-class UserInfoLogic : ObservableObject {
+class StartScreenController : ObservableObject {
     @Published var isLoading = false
     
     func start(name : String, age : String, weight : String, height: String) async throws {

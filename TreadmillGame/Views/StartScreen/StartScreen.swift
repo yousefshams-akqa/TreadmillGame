@@ -7,9 +7,10 @@
 
 import SwiftUI
 import SwiftData
+import CoreMotion
 
 struct StartScreen: View {
-    @EnvironmentObject private var userInfoLogic : UserInfoLogic
+    @EnvironmentObject private var userInfoLogic : StartScreenController
     @State private var name : String = ""
     @State private var age : String = ""
     @State private var weight : String = ""
@@ -46,15 +47,21 @@ struct StartScreen: View {
                     Spacer()
                     Spacer()
                 }.navigationDestination(isPresented: $showGame) {
-                    GameScreen(userData: UserModel(name: name, age: age, weight: weight, height: height)).environmentObject(GameController(stepsRepo: StepsRepository.instance, hapticService: HapticsService()))
+                    GameScreen(userData: UserModel(name: name, age: age, weight: weight, height: height)).environmentObject(createGameController())
                 }
             }
         }
     }
     
-    
+    private func createGameController() -> GameController {
+        let hapticService = HapticsService()
+        let stepsRepo = StepsRepository(motionManager: CMMotionManager())
+        let soundRepo = SoundRepositroy()
+        let enemiesRepo = EnemiesRepository(hapticService: hapticService)
+        return GameController(stepsRepo: stepsRepo, hapticService: hapticService, soundRepo: soundRepo, enemiesRepo: enemiesRepo)
+    }
 }
 
 #Preview {
-    StartScreen().environmentObject(UserInfoLogic())
+    StartScreen().environmentObject(StartScreenController())
 }

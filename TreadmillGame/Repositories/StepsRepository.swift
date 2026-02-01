@@ -19,18 +19,14 @@ class StepsRepository {
     private let STEP_THRESHOLD = 1.15      // acceleration magnitude (in g)
     private let MIN_STEP_INTERVAL = 0.3    // seconds (300 ms)
     private let SMOOTHING_WINDOW = 5       // samples
-    private let MAX_RECENT_STEPS = 3
+    private let MAX_RECENT_STEPS = 6
     private let SECONDS_STOPPED_WINDOW = 2
     
     private var recentStepTimes : [TimeInterval] = []
     var isStreamReady : Bool = false
     var lastStepResult : StepsResult!
     
-    static var instance : StepsRepository = StepsRepository(motionManager: CMMotionManager())
-    
-    
-    
-    private init(motionManager: CMMotionManager) {
+    init(motionManager: CMMotionManager) {
         self.motionManager = motionManager
     }
 
@@ -82,15 +78,19 @@ class StepsRepository {
         
         if recentStepTimes.count > 1 {
             let timeDiff = Date.now.timeIntervalSince1970 - (recentStepTimes.last ?? 0.0)
+            let lastHasStoppedMovingValue = hasStoppedMoving
             hasStoppedMoving = timeDiff > Double(SECONDS_STOPPED_WINDOW)
-            streamContinuation.yield(StepsResult(steps: steps, speed: 0, distance: lastStepResult.distance, hasStoppedMoving: hasStoppedMoving))
+            if hasStoppedMoving != lastHasStoppedMovingValue {
+                streamContinuation.yield(StepsResult(steps: steps, speed: 0, distance: lastStepResult.distance, hasStoppedMoving: hasStoppedMoving, stepsPerSecond: 0))
+            }
         }
     }
     
     private func calculateStepsResult() -> StepsResult {
         var speed = 0.0
         var distance = 0.0
-        
+        var stepsPerSecond = 0.0
+
         steps += 1
         lastStepTime = Date.now.timeIntervalSince1970
         firstStepTime = steps == 1 ? Date.now : firstStepTime
@@ -98,18 +98,20 @@ class StepsRepository {
         if recentStepTimes.count >= MAX_RECENT_STEPS {
             recentStepTimes.removeFirst()
         }
+        
         recentStepTimes.append(Date.now.timeIntervalSince1970)
 
         if recentStepTimes.count >= 2 {
             let timeDifference = (recentStepTimes.last ?? 0.0) - (recentStepTimes.first ?? 0.0)
             let numberOfSteps = Double(recentStepTimes.count - 1)
             if timeDifference > 0 {
-                speed = numberOfSteps / Double(timeDifference) * strideLength
+                stepsPerSecond = numberOfSteps / Double(timeDifference)
+                speed = stepsPerSecond * strideLength * 3.6
                 distance = Double(steps) * strideLength / 1000
             }
         }
         
-        return StepsResult(steps: steps, speed: speed, distance: distance, hasStoppedMoving: false)
+        return StepsResult(steps: steps, speed: speed, distance: distance, hasStoppedMoving: false, stepsPerSecond : Int(stepsPerSecond.rounded(.up)))
     }
     
     private func isAStep(data : CMAccelerometerData) -> Bool {

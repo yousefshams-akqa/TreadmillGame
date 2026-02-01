@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreMotion
 
 struct GameScreen: View {
     @EnvironmentObject private var gameController : GameController
@@ -6,7 +7,7 @@ struct GameScreen: View {
     var body: some View {
         HStack {
             Text("Steps: \(gameController.steps)")
-            Text("\(String(format: "Speed: %.2f", gameController.speed)) km/h")
+            Text("Steps Per Second: \(gameController.stepsPerSecond)")
             Text("\(String(format: "Distance: %.2f", gameController.distance)) km")
 
         }
@@ -15,17 +16,23 @@ struct GameScreen: View {
         }
         .task {
             do {
-                try await gameController.startSteps()
+                try await gameController.startGame()
             }
             catch {
                 print(error.localizedDescription)
             }
         }
     }
+    
 }
 
 #Preview {
+    let hapticService = HapticsService()
+    let stepsRepo = StepsRepository(motionManager: CMMotionManager())
+    let soundRepo = SoundRepositroy()
+    let enemiesRepo = EnemiesRepository(hapticService: hapticService)
+    let controller = GameController(stepsRepo: stepsRepo, hapticService: hapticService, soundRepo: soundRepo, enemiesRepo: enemiesRepo)
     GameScreen(
         userData: UserModel(name: "", age: "", weight: "", height: "")
-    ).environmentObject(GameController(stepsRepo: StepsRepository.instance, hapticService: HapticsService()))
+    ).environmentObject(controller)
 }

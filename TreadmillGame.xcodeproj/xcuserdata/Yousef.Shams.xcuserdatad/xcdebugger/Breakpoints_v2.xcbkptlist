@@ -32,7 +32,23 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "8"
             endingLineNumber = "8"
-            landmarkName = "getGrassHapticPattern()"
+            landmarkName = "HapticsPatterns"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "22CD48C5-269F-4CA6-97D6-0D5A7452C90B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "TreadmillGame/Repositories/EnemiesRepository.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "deployEnemy(enemy:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

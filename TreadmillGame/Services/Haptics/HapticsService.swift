@@ -1,11 +1,12 @@
 import CoreHaptics
 
 class HapticsService {
+    
     var supportsHaptics: Bool = false
     var engine: CHHapticEngine!
-    var grassPlayer : CHHapticAdvancedPatternPlayer!
     var isInit : Bool = false
     var isPlayerFinished : Bool = false
+
     func initEngine() throws {
         if isInit {
             return
@@ -29,22 +30,21 @@ class HapticsService {
         engine.resetHandler = resetHandler
         engine.stoppedHandler = stoppedHandler
         
-        // Preparing haptic patterns and  players
-        let grassPattern = try HapticsPatterns.getGrassHapticPattern()
-        let grassPlayer = try HapticsPatterns.getHapticPlayerFromPattern(pattern: grassPattern, engine: engine)
-        
         engine.notifyWhenPlayersFinished { error in
             self.isPlayerFinished = true
             return .leaveEngineRunning
         }
 
-
         try engine.start()
-        grassPlayer.loopEnabled = true
-        try grassPlayer.start(atTime: 0)
         isInit = true
     }
+    
+    func playPattern(pattern: CHHapticPattern) throws {
+        let player = try HapticsPatterns.getHapticPlayerFromPattern(pattern: pattern, engine: engine)
+        try player.start(atTime: 0)
+    }
 
+    
     
     func resetHandler() {
         print("Reset Handler: Restarting the engine.")
@@ -79,7 +79,6 @@ class HapticsService {
     }
     
     func dispose() {
-        try? grassPlayer.stop(atTime: 0)
         engine.stop()
     }
 }
