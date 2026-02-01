@@ -19,9 +19,10 @@ class StepsRepository {
     private let STEP_THRESHOLD = 1.15      // acceleration magnitude (in g)
     private let MIN_STEP_INTERVAL = 0.3    // seconds (300 ms)
     private let SMOOTHING_WINDOW = 5       // samples
-    private var recentStepTimes : [TimeInterval] = []
     private let MAX_RECENT_STEPS = 3
     private let SECONDS_STOPPED_WINDOW = 2
+    
+    private var recentStepTimes : [TimeInterval] = []
     var isStreamReady : Bool = false
     var lastStepResult : StepsResult!
     
