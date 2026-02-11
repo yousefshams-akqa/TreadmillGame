@@ -1,31 +1,63 @@
 import Foundation
+import SwiftUICore
 import CoreHaptics
 import AVFAudio
 
 class EnemiesRepository {
     
-    var enemy : EnemyModel?
-    var startSteps : [Int] = [15, 200 , 500 , 800 , 1200]
-    let hapticService : HapticsService
-    var enemyPlayer : CHHapticAdvancedPatternPlayer!
+    var enemy: EnemyModel?
+    
+    /// Enemy configurations from the level, sorted by spawn step
+    private var enemyConfigs: [EnemyConfig]
+    
+    /// Index of the next enemy to deploy
+    private var nextEnemyIndex: Int = 0
+
+    /// Timestamp for when the enemy first reached/passed the player (used for time-grace catch).
+    private var catchStartedAt: Date?
+    
+    let hapticService: HapticsService
+    var enemyPlayer: CHHapticAdvancedPatternPlayer!
     var enemyAudioPlayer: AVAudioPlayer?
     private var lastClosenessValue: Float = -1.0 // Track last value to avoid unnecessary updates
 
-    init(hapticService: HapticsService) {
+    init(hapticService: HapticsService, enemyConfigs: [EnemyConfig] = []) {
         self.hapticService = hapticService
+        self.enemyConfigs = enemyConfigs.sorted { $0.spawnAtStep < $1.spawnAtStep }
+    }
+    /// Configure enemies for a new game session
+    func configure(with configs: [EnemyConfig]) {
+        self.enemyConfigs = configs.sorted { $0.spawnAtStep < $1.spawnAtStep }
+        self.nextEnemyIndex = 0
+        self.enemy = nil
+        self.lastClosenessValue = -1.0
+        self.catchStartedAt = nil
     }
     
-    func deployEnemy(enemy deployedEnemy : EnemyModel) {
-        print("[EnemiesRepo] Deploying enemy - startStep: \(deployedEnemy.startStep), maxSteps: \(deployedEnemy.maxSteps), stepsPerSecond: \(deployedEnemy.stepsPerSecond)")
+    /// Get the current enemy config (if an enemy is active)
+    var currentEnemyConfig: EnemyConfig? {
+        guard enemy != nil, nextEnemyIndex > 0 else { return nil }
+        return enemyConfigs[nextEnemyIndex - 1]
+    }
+    
+    func deployEnemy(config: EnemyConfig) {
+        print("[EnemiesRepo] Deploying enemy - startStep: \(config.spawnAtStep), maxSteps: \(config.maxSteps), stepsPerSecond: \(config.stepsPerSecond)")
+        let deployedEnemy = EnemyModel(
+            startStep: config.spawnAtStep,
+            maxSteps: config.maxSteps,
+            stepsPerSecond: config.stepsPerSecond
+        )
         deployedEnemy.setDate(date: Date.now)
         enemy = deployedEnemy
+        catchStartedAt = nil
         print("[EnemiesRepo] Enemy deployed at time: \(Date.now)")
     }
-    
+
     func destoryEnemy() {
         print("[EnemiesRepo] Destroying enemy")
         enemy = nil
-        try? enemyPlayer.stop(atTime: 0)
+        catchStartedAt = nil
+        try? enemyPlayer?.stop(atTime: 0)
     }
     
     func getEnemyCurrentSteps() -> Double {
@@ -52,36 +84,93 @@ class EnemiesRepository {
     }
 
     
-    func handleEnemyLifeCycle(playerSteps: Int64, gameOverCallback: (Bool) -> Void, soundRepo : SoundRepositroy) {
+    func handleEnemyLifeCycle(
+        playerSteps: Int64,
+        playerStepsPerSecond: Double,
+        difficulty: Difficulty,
+        gameOverCallback: (Bool) -> Void,
+        soundRepo: SoundRepository
+    ) {
         print("[EnemiesRepo] handleEnemyLifeCycle - playerSteps: \(playerSteps), hasEnemy: \(enemy != nil)")
-        if enemy == nil {
-            handleEmptyEnemies(playerSteps: playerSteps, soundRepo: soundRepo)
+        
+        // Check if a new enemy should spawn (even if one is already active)
+        if shouldSpawnNextEnemy(playerSteps: playerSteps) {
+            print("[EnemiesRepo] Next enemy spawn step reached - destroying current enemy to spawn new one")
+            destoryEnemy()
+            pauseHaptics()
+            soundRepo.stopEnemyRunningSound()
+            spawnNextEnemy(playerSteps: playerSteps, playerStepsPerSecond: playerStepsPerSecond, difficulty: difficulty, soundRepo: soundRepo)
             return
         }
-        handleEnemies(playerSteps: playerSteps, gameOverCallback: gameOverCallback, soundRepo : soundRepo)
+        
+        if enemy == nil {
+            handleEmptyEnemies(playerSteps: playerSteps, playerStepsPerSecond: playerStepsPerSecond, difficulty: difficulty, soundRepo: soundRepo)
+            return
+        }
+        handleEnemies(playerSteps: playerSteps, difficulty: difficulty, gameOverCallback: gameOverCallback, soundRepo: soundRepo)
     }
     
-    private func handleEmptyEnemies(playerSteps: Int64, soundRepo : SoundRepositroy) {
-        print("[EnemiesRepo] handleEmptyEnemies - playerSteps: \(playerSteps), remainingStartSteps: \(startSteps)")
-        if !startSteps.isEmpty {
-            let startStep = startSteps.first!
-            print("[EnemiesRepo] Checking next startStep: \(startStep) vs playerSteps: \(playerSteps)")
-            if startStep <= playerSteps {
-                startSteps.removeFirst()
-                print("[EnemiesRepo] Condition met! Deploying new enemy at startStep: \(startStep)")
-                deployEnemy(enemy: EnemyModel(startStep: startStep, maxSteps: 100, stepsPerSecond: 1))
-                initHaptics()
-                soundRepo.startEnemyStartSound()
-                soundRepo.startEnemyRunningSound()
-            } else {
-                print("[EnemiesRepo] Condition not met - waiting for player to reach step \(startStep)")
-            }
+    /// Check if the next enemy should spawn based on player steps
+    private func shouldSpawnNextEnemy(playerSteps: Int64) -> Bool {
+        guard enemy != nil else { return false } // Only relevant when an enemy is active
+        guard nextEnemyIndex < enemyConfigs.count else { return false }
+        
+        let nextConfig = enemyConfigs[nextEnemyIndex]
+        return nextConfig.spawnAtStep <= playerSteps
+    }
+    
+    /// Spawn the next enemy in the queue
+    private func spawnNextEnemy(
+        playerSteps: Int64,
+        playerStepsPerSecond: Double,
+        difficulty: Difficulty,
+        soundRepo: SoundRepository
+    ) {
+        guard nextEnemyIndex < enemyConfigs.count else { return }
+        
+        let nextConfig = enemyConfigs[nextEnemyIndex]
+        nextEnemyIndex += 1
+        print("[EnemiesRepo] Spawning next enemy at step: \(nextConfig.spawnAtStep)")
+        deployEnemy(config: effectiveEnemyConfig(from: nextConfig, playerStepsPerSecond: playerStepsPerSecond, difficulty: difficulty))
+        initHaptics()
+        soundRepo.startEnemyStartSound()
+        soundRepo.startEnemyRunningSound()
+    }
+    
+    private func handleEmptyEnemies(
+        playerSteps: Int64,
+        playerStepsPerSecond: Double,
+        difficulty: Difficulty,
+        soundRepo: SoundRepository
+    ) {
+        print("[EnemiesRepo] handleEmptyEnemies - playerSteps: \(playerSteps), nextEnemyIndex: \(nextEnemyIndex), totalEnemies: \(enemyConfigs.count)")
+        
+        guard nextEnemyIndex < enemyConfigs.count else {
+            print("[EnemiesRepo] No more enemies to deploy")
+            return
+        }
+        
+        let nextConfig = enemyConfigs[nextEnemyIndex]
+        print("[EnemiesRepo] Checking next enemy spawn at step: \(nextConfig.spawnAtStep) vs playerSteps: \(playerSteps)")
+        
+        if nextConfig.spawnAtStep <= playerSteps {
+            nextEnemyIndex += 1
+            print("[EnemiesRepo] Condition met! Deploying new enemy at startStep: \(nextConfig.spawnAtStep)")
+            deployEnemy(config: effectiveEnemyConfig(from: nextConfig, playerStepsPerSecond: playerStepsPerSecond, difficulty: difficulty))
+            initHaptics()
+            soundRepo.startEnemyStartSound()
+            soundRepo.startEnemyRunningSound()
         } else {
-            print("[EnemiesRepo] No more enemies to deploy - startSteps is empty")
+            print("[EnemiesRepo] Condition not met - waiting for player to reach step \(nextConfig.spawnAtStep)")
         }
     }
     
-    private func handleEnemies(playerSteps: Int64, gameOverCallback: (Bool) -> Void, soundRepo : SoundRepositroy) {
+    private func handleEnemies(
+        playerSteps: Int64,
+        difficulty: Difficulty,
+        gameOverCallback: (Bool) -> Void,
+        soundRepo: SoundRepository
+    ) {
         print("[EnemiesRepo] handleEnemies - playerSteps: \(playerSteps)")
         
         if checkIfEnemyRanMaxSteps() {
@@ -94,7 +183,7 @@ class EnemiesRepository {
         
         let enemySteps = getEnemyCurrentSteps()
         print("[EnemiesRepo] Comparing - enemySteps: \(String(format: "%.2f", enemySteps)) vs playerSteps: \(playerSteps)")
-        if isGameOver(enemySteps: enemySteps, playerSteps: playerSteps){
+        if isGameOver(enemySteps: enemySteps, playerSteps: playerSteps, difficulty: difficulty) {
             print("[EnemiesRepo] GAME OVER! Enemy caught the player!")
             pauseHaptics()
             soundRepo.stopEnemyRunningSound()
@@ -110,13 +199,13 @@ class EnemiesRepository {
         if enemyPlayer == nil {
             print("[EnemiesRepo] Creating new enemyPlayer")
             enemyPlayer = try? HapticsPatterns.getHapticPlayerFromPattern(pattern: HapticsPatterns.getEnemyRunningPattern(), engine: hapticService.engine)
-            enemyPlayer.loopEnabled = true
-            try? enemyPlayer.start(atTime: 0)
+            enemyPlayer?.loopEnabled = true
+            try? enemyPlayer?.start(atTime: 0)
             print("[EnemiesRepo] enemyPlayer started with looping enabled")
         }
         else {
             print("[EnemiesRepo] Seeking existing enemyPlayer to offset 0")
-            try? enemyPlayer.seek(toOffset: 0)
+            try? enemyPlayer?.seek(toOffset: 0)
         }
     }
     
@@ -134,9 +223,42 @@ class EnemiesRepository {
         }
     }
 
-    private func isGameOver(enemySteps : Double, playerSteps: Int64) -> Bool {
-        let allowedExtraStepsMargin = 5.0
-        return enemySteps >= Double(playerSteps) + allowedExtraStepsMargin
+    private func isGameOver(enemySteps: Double, playerSteps: Int64, difficulty: Difficulty) -> Bool {
+        let playerStepsDouble = Double(playerSteps)
+
+        // If the player is still ahead, reset the grace timer.
+        if enemySteps < playerStepsDouble {
+            catchStartedAt = nil
+            return false
+        }
+
+        else {
+            // Enemy has reached/passed the player: start (or continue) the grace timer.
+            if catchStartedAt == nil {
+                catchStartedAt = Date.now
+                return false
+            }
+
+            let configuredGrace = currentEnemyConfig?.catchMargin ?? 0
+            let effectiveGraceSeconds = max(configuredGrace, difficulty.minCatchGraceSeconds)
+            let elapsed = Date.now.timeIntervalSince(catchStartedAt ?? Date.now)
+            return elapsed >= effectiveGraceSeconds
+        }
+    }
+
+    private func effectiveEnemyConfig(from config: EnemyConfig, playerStepsPerSecond: Double, difficulty: Difficulty) -> EnemyConfig {
+        // No adaptive speed on easy.
+        guard !difficulty.isEasy else { return config }
+
+        let playerSps = max(playerStepsPerSecond, 0.1)
+        let hybridSps = (0.5 * playerSps) + (0.5 * config.stepsPerSecond)
+        let effectiveSps = max(config.stepsPerSecond, hybridSps, playerSps + difficulty.enemyDeltaSps)
+        return EnemyConfig(
+            spawnAtStep: config.spawnAtStep,
+            maxSteps: config.maxSteps,
+            stepsPerSecond: effectiveSps,
+            catchMargin: config.catchMargin
+        )
     }
     
     /// Calculates how close the enemy is to the player as a value between 0 and 1
@@ -158,13 +280,13 @@ class EnemiesRepository {
     }
     
     /// Updates the enemy haptic player's intensity/sharpness based on current closeness
-    /// Only sends parameters if closeness changed by at least 0.2 from last update
+    /// Only sends parameters if closeness changed by at least 0.15 from last update
     func updateEnemyEffectsForCloseness(playerSteps: Int64) {
         guard let enemyPlayer else { return }
         
         let closeness = getEnemyCloseness(playerSteps: playerSteps)
         
-        // Only update if difference is at least 0.2
+        // Only update if difference is at least 0.15
         guard abs(closeness - lastClosenessValue) >= 0.15 else { return }
         
         lastClosenessValue = closeness
@@ -180,5 +302,15 @@ class EnemiesRepository {
         } catch {
             print("[EnemiesRepo] Error updating haptic parameters: \(error)")
         }
+    }
+    
+    /// Reset the repository for a new game
+    func reset() {
+        enemy = nil
+        nextEnemyIndex = 0
+        lastClosenessValue = -1.0
+        catchStartedAt = nil
+        try? enemyPlayer?.cancel()
+        enemyPlayer = nil
     }
 }

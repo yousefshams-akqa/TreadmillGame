@@ -12,7 +12,9 @@ class StepsRepository {
     private var peakMagnitude : Double = 0
     private var firstStepTime : Date?
     
-    private var strideLength = 1.75 * 0.415
+    /// Stride length in meters (must be configured before start() via GameController)
+    /// Default is a reasonable fallback but should be overridden from UserSettings
+    var strideLength: Double = UserSettings.default.strideLength
     var hasStoppedMoving : Bool = false
     
     private let SAMPLE_RATE = 50

@@ -9,6 +9,7 @@ class HapticsService {
 
     func initEngine() throws {
         if isInit {
+            try? restart()
             return
         }
         
@@ -80,6 +81,10 @@ class HapticsService {
     
     func dispose() {
         engine.stop()
+    }
+    
+    func restart() throws {
+        try engine.start()
     }
 }
 

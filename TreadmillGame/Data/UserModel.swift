@@ -1,19 +1,28 @@
-struct UserModel : Codable, Hashable {
-    var name : String
-    var age : String
-    var weight : String
-    var height : String
+import Foundation
+
+struct UserModel: Codable, Hashable {
+    var name: String
+    var age: String
+    var weight: String
+    var height: String
     
-    func toJson() -> Dictionary<String, Any> {
-        return [
-            "name" : name,
-            "age" : age,
-            "weight" : weight,
-            "height" : height
-        ]
+    // MARK: - Persistence
+    
+    private static let userDefaultsKey = "user"
+    
+    /// Save user to UserDefaults
+    func save() {
+        if let encoded = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(encoded, forKey: Self.userDefaultsKey)
+        }
     }
     
-    static func fromJson(data: Dictionary<String, Any>) -> UserModel  {
-        return UserModel(name: data["name"] as! String, age: data["age"] as! String, weight: data["weight"] as! String, height: data["height"] as! String)
+    /// Load user from UserDefaults, or return nil if not found
+    static func load() -> UserModel? {
+        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+              let user = try? JSONDecoder().decode(UserModel.self, from: data) else {
+            return nil
+        }
+        return user
     }
 }

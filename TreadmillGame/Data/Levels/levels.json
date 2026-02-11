@@ -1,0 +1,452 @@
+{
+    "schemaVersion": 1,
+    "levels": [
+        {
+            "schemaVersion": 1,
+            "id": "tutorial",
+            "name": "First Steps",
+            "description": "Learn the basics with a gentle introduction. Few enemies, lots of guidance.",
+            "stepGoal": 1500,
+            "timeLimit": null,
+            "defaultStrideLength": 0.726,
+            "enemies": [
+                {
+                    "spawnAtStep": 20,
+                    "maxSteps": 80,
+                    "stepsPerSecond": 0.8,
+                    "catchMargin": 8.0
+                },
+                {
+                    "spawnAtStep": 60,
+                    "maxSteps": 60,
+                    "stepsPerSecond": 0.9,
+                    "catchMargin": 6.0
+                }
+            ],
+            "audio": {
+                "environmentSound": {
+                    "kind": "bundled",
+                    "value": "winter_wind_sound.mp3"
+                },
+                "enemySpawnSound": {
+                    "kind": "bundled",
+                    "value": "enemy_start_sound.mp3"
+                },
+                "enemyRunningSound": {
+                    "kind": "bundled",
+                    "value": "enemy_running_sound.mp3"
+                },
+                "enemyGameOverSound": {
+                    "kind": "bundled",
+                    "value": "enemy_game_over_sound.mp3"
+                },
+                "victorySound": {
+                    "kind": "bundled",
+                    "value": "victory_sound.mp3"
+                }
+            },
+            "ttsMessages": {
+                "enemyApproaching": "Watch out! Something is approaching.",
+                "enemyClose": "Run faster! It's getting close!",
+                "stepsRemaining": [
+                    { "remainingSteps": 1000, "text": "Great start! 1,000 steps to go." },
+                    { "remainingSteps": 750, "text": "Strong pace! 750 steps left." },
+                    { "remainingSteps": 300, "text": "Almost there! Just 300 more steps!" },
+                    { "remainingSteps": 100, "text": "Final push! 100 steps!" }
+                ],
+                "motivational": [
+                    "You're doing great!",
+                    "Keep up the pace!",
+                    "Stay focused!"
+                ],
+                "victory": "Congratulations! You completed the tutorial!",
+                "defeat": "Don't give up! Try again."
+            },
+            "theme": {
+                "backgroundAsset": null,
+                "accentColorHex": "#34C759",
+                "environmentLabel": "Winter Training Ground"
+            },
+            "difficulty": "easy",
+            "order": 1
+        },
+        {
+            "schemaVersion": 1,
+            "id": "chase",
+            "name": "The Chase",
+            "description": "Multiple enemies will hunt you down. Stay ahead to survive!",
+            "stepGoal": 3500,
+            "timeLimit": null,
+            "defaultStrideLength": 0.726,
+            "enemies": [
+                {
+                    "spawnAtStep": 10,
+                    "maxSteps": 80,
+                    "stepsPerSecond": 1.3,
+                    "catchMargin": 4.0
+                },
+                {
+                    "spawnAtStep": 40,
+                    "maxSteps": 90,
+                    "stepsPerSecond": 1.4,
+                    "catchMargin": 4.0
+                },
+                {
+                    "spawnAtStep": 80,
+                    "maxSteps": 85,
+                    "stepsPerSecond": 1.5,
+                    "catchMargin": 3.5
+                },
+                {
+                    "spawnAtStep": 120,
+                    "maxSteps": 80,
+                    "stepsPerSecond": 1.6,
+                    "catchMargin": 3.0
+                },
+                {
+                    "spawnAtStep": 160,
+                    "maxSteps": 70,
+                    "stepsPerSecond": 1.7,
+                    "catchMargin": 3.0
+                },
+                {
+                    "spawnAtStep": 200,
+                    "maxSteps": 60,
+                    "stepsPerSecond": 1.8,
+                    "catchMargin": 2.5
+                },
+                {
+                    "spawnAtStep": 230,
+                    "maxSteps": 50,
+                    "stepsPerSecond": 1.9,
+                    "catchMargin": 2.5
+                }
+            ],
+            "audio": {
+                "environmentSound": {
+                    "kind": "bundled",
+                    "value": "winter_wind_sound.mp3"
+                },
+                "enemySpawnSound": {
+                    "kind": "bundled",
+                    "value": "enemy_start_sound.mp3"
+                },
+                "enemyRunningSound": {
+                    "kind": "bundled",
+                    "value": "enemy_running_sound.mp3"
+                },
+                "enemyGameOverSound": {
+                    "kind": "bundled",
+                    "value": "enemy_game_over_sound.mp3"
+                },
+                "victorySound": {
+                    "kind": "bundled",
+                    "value": "victory_sound.mp3"
+                }
+            },
+            "ttsMessages": {
+                "enemyApproaching": "Enemy approaching! Pick up the pace!",
+                "enemyClose": "Run! It's right behind you!",
+                "stepsRemaining": [
+                    { "remainingSteps": 2500, "text": "2,500 steps remaining. Stay alert!" },
+                    { "remainingSteps": 1750, "text": "Halfway there! 1,750 steps to go!" },
+                    { "remainingSteps": 800, "text": "800 steps left! Push harder!" },
+                    { "remainingSteps": 200, "text": "Almost there! 200 more steps!" }
+                ],
+                "motivational": [
+                    "Don't slow down!",
+                    "You can do this!",
+                    "Keep running!"
+                ],
+                "victory": "You escaped! Well done!",
+                "defeat": "They caught you. Try again!"
+            },
+            "theme": {
+                "backgroundAsset": null,
+                "accentColorHex": "#FF9500",
+                "environmentLabel": "Frozen Wasteland"
+            },
+            "difficulty": "medium",
+            "order": 2
+        },
+        {
+            "schemaVersion": 1,
+            "id": "survival",
+            "name": "Survival Run",
+            "description": "An intense endurance challenge. Fast enemies, no mercy. Only the strong survive.",
+            "stepGoal": 5000,
+            "timeLimit": null,
+            "defaultStrideLength": 0.726,
+            "enemies": [
+                {
+                    "spawnAtStep": 8,
+                    "maxSteps": 70,
+                    "stepsPerSecond": 1.5,
+                    "catchMargin": 3.5
+                },
+                {
+                    "spawnAtStep": 35,
+                    "maxSteps": 80,
+                    "stepsPerSecond": 1.6,
+                    "catchMargin": 3.5
+                },
+                {
+                    "spawnAtStep": 70,
+                    "maxSteps": 75,
+                    "stepsPerSecond": 1.7,
+                    "catchMargin": 3.0
+                },
+                {
+                    "spawnAtStep": 110,
+                    "maxSteps": 70,
+                    "stepsPerSecond": 1.8,
+                    "catchMargin": 3.0
+                },
+                {
+                    "spawnAtStep": 150,
+                    "maxSteps": 65,
+                    "stepsPerSecond": 1.9,
+                    "catchMargin": 2.5
+                },
+                {
+                    "spawnAtStep": 190,
+                    "maxSteps": 60,
+                    "stepsPerSecond": 2.0,
+                    "catchMargin": 2.5
+                },
+                {
+                    "spawnAtStep": 230,
+                    "maxSteps": 55,
+                    "stepsPerSecond": 2.1,
+                    "catchMargin": 2.0
+                },
+                {
+                    "spawnAtStep": 270,
+                    "maxSteps": 50,
+                    "stepsPerSecond": 2.2,
+                    "catchMargin": 2.0
+                },
+                {
+                    "spawnAtStep": 310,
+                    "maxSteps": 50,
+                    "stepsPerSecond": 2.3,
+                    "catchMargin": 1.5
+                },
+                {
+                    "spawnAtStep": 350,
+                    "maxSteps": 45,
+                    "stepsPerSecond": 2.5,
+                    "catchMargin": 1.5
+                },
+                {
+                    "spawnAtStep": 380,
+                    "maxSteps": 40,
+                    "stepsPerSecond": 2.7,
+                    "catchMargin": 1.5
+                }
+            ],
+            "audio": {
+                "environmentSound": {
+                    "kind": "bundled",
+                    "value": "winter_wind_sound.mp3"
+                },
+                "enemySpawnSound": {
+                    "kind": "bundled",
+                    "value": "enemy_start_sound.mp3"
+                },
+                "enemyRunningSound": {
+                    "kind": "bundled",
+                    "value": "enemy_running_sound.mp3"
+                },
+                "enemyGameOverSound": {
+                    "kind": "bundled",
+                    "value": "enemy_game_over_sound.mp3"
+                },
+                "victorySound": {
+                    "kind": "bundled",
+                    "value": "victory_sound.mp3"
+                }
+            },
+            "ttsMessages": {
+                "enemyApproaching": "Incoming!",
+                "enemyClose": "Move! Now!",
+                "stepsRemaining": [
+                    { "remainingSteps": 3000, "text": "3,000 to go. Stay strong." },
+                    { "remainingSteps": 1500, "text": "1,500 steps. Dig deep." },
+                    { "remainingSteps": 500, "text": "500 more. Everything you've got!" },
+                    { "remainingSteps": 100, "text": "100 steps! Sprint!" }
+                ],
+                "motivational": [
+                    "Pain is temporary!",
+                    "Push through!",
+                    "Never give up!"
+                ],
+                "victory": "Incredible! You survived the impossible!",
+                "defeat": "So close. You'll get it next time."
+            },
+            "theme": {
+                "backgroundAsset": null,
+                "accentColorHex": "#FF3B30",
+                "environmentLabel": "The Blizzard"
+            },
+            "difficulty": "hard",
+            "order": 3
+        },
+        {
+            "schemaVersion": 1,
+            "id": "extreme",
+            "name": "Death March",
+            "description": "The ultimate test. Relentless enemies, razor-thin margins. Only legends complete this.",
+            "stepGoal": 10000,
+            "timeLimit": null,
+            "defaultStrideLength": 0.726,
+            "enemies": [
+                {
+                    "spawnAtStep": 5,
+                    "maxSteps": 60,
+                    "stepsPerSecond": 1.8,
+                    "catchMargin": 3.0
+                },
+                {
+                    "spawnAtStep": 25,
+                    "maxSteps": 65,
+                    "stepsPerSecond": 1.9,
+                    "catchMargin": 3.0
+                },
+                {
+                    "spawnAtStep": 50,
+                    "maxSteps": 60,
+                    "stepsPerSecond": 2.0,
+                    "catchMargin": 2.5
+                },
+                {
+                    "spawnAtStep": 80,
+                    "maxSteps": 55,
+                    "stepsPerSecond": 2.1,
+                    "catchMargin": 2.5
+                },
+                {
+                    "spawnAtStep": 110,
+                    "maxSteps": 55,
+                    "stepsPerSecond": 2.2,
+                    "catchMargin": 2.0
+                },
+                {
+                    "spawnAtStep": 140,
+                    "maxSteps": 50,
+                    "stepsPerSecond": 2.3,
+                    "catchMargin": 2.0
+                },
+                {
+                    "spawnAtStep": 175,
+                    "maxSteps": 50,
+                    "stepsPerSecond": 2.4,
+                    "catchMargin": 2.0
+                },
+                {
+                    "spawnAtStep": 210,
+                    "maxSteps": 45,
+                    "stepsPerSecond": 2.5,
+                    "catchMargin": 1.5
+                },
+                {
+                    "spawnAtStep": 245,
+                    "maxSteps": 45,
+                    "stepsPerSecond": 2.6,
+                    "catchMargin": 1.5
+                },
+                {
+                    "spawnAtStep": 280,
+                    "maxSteps": 40,
+                    "stepsPerSecond": 2.7,
+                    "catchMargin": 1.5
+                },
+                {
+                    "spawnAtStep": 315,
+                    "maxSteps": 40,
+                    "stepsPerSecond": 2.8,
+                    "catchMargin": 1.0
+                },
+                {
+                    "spawnAtStep": 350,
+                    "maxSteps": 35,
+                    "stepsPerSecond": 2.9,
+                    "catchMargin": 1.0
+                },
+                {
+                    "spawnAtStep": 385,
+                    "maxSteps": 35,
+                    "stepsPerSecond": 3.0,
+                    "catchMargin": 1.0
+                },
+                {
+                    "spawnAtStep": 420,
+                    "maxSteps": 35,
+                    "stepsPerSecond": 3.1,
+                    "catchMargin": 1.0
+                },
+                {
+                    "spawnAtStep": 455,
+                    "maxSteps": 30,
+                    "stepsPerSecond": 3.2,
+                    "catchMargin": 1.0
+                },
+                {
+                    "spawnAtStep": 480,
+                    "maxSteps": 25,
+                    "stepsPerSecond": 3.5,
+                    "catchMargin": 1.0
+                }
+            ],
+            "audio": {
+                "environmentSound": {
+                    "kind": "bundled",
+                    "value": "winter_wind_sound.mp3"
+                },
+                "enemySpawnSound": {
+                    "kind": "bundled",
+                    "value": "enemy_start_sound.mp3"
+                },
+                "enemyRunningSound": {
+                    "kind": "bundled",
+                    "value": "enemy_running_sound.mp3"
+                },
+                "enemyGameOverSound": {
+                    "kind": "bundled",
+                    "value": "enemy_game_over_sound.mp3"
+                },
+                "victorySound": {
+                    "kind": "bundled",
+                    "value": "victory_sound.mp3"
+                }
+            },
+            "ttsMessages": {
+                "enemyApproaching": "They're coming!",
+                "enemyClose": "RUN!",
+                "stepsRemaining": [
+                    { "remainingSteps": 8000, "text": "8,000 to go. This is just the beginning." },
+                    { "remainingSteps": 6000, "text": "6,000 steps. The real challenge starts now." },
+                    { "remainingSteps": 4000, "text": "4,000 remaining. Show them what you're made of!" },
+                    { "remainingSteps": 2000, "text": "2,000 steps! Don't you dare slow down!" },
+                    { "remainingSteps": 1000, "text": "1,000 more! Give everything!" },
+                    { "remainingSteps": 100, "text": "100 steps! FINISH THIS!" }
+                ],
+                "motivational": [
+                    "Embrace the pain!",
+                    "You are unstoppable!",
+                    "Fear nothing!",
+                    "Break your limits!"
+                ],
+                "victory": "LEGENDARY! You conquered the impossible!",
+                "defeat": "The Death March claims another. Rise again."
+            },
+            "theme": {
+                "backgroundAsset": null,
+                "accentColorHex": "#AF52DE",
+                "environmentLabel": "The Abyss"
+            },
+            "difficulty": "extreme",
+            "order": 4
+        }
+    ]
+}
