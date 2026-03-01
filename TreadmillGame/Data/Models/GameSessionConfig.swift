@@ -48,7 +48,7 @@ struct GameSessionConfig {
     
     /// Enemy configurations from the level, sorted by spawn step
     var enemies: [EnemyConfig] {
-        level.enemies.sorted { $0.spawnAtStep < $1.spawnAtStep }
+        EnemyGenerationService.generate(for: level)
     }
     
     /// Audio configuration from the level
@@ -85,9 +85,8 @@ struct GameSessionConfig {
             stepGoal: stepGoal,
             timeLimit: nil,
             defaultStrideLength: 0.726,
-            enemies: [
-                EnemyConfig(spawnAtStep: 20, maxSteps: 80, stepsPerSecond: 1.0, catchMargin: 5.0)
-            ],
+                enemyCount: 8,
+                enemies: nil,
             audio: LevelAudio(
                 environmentSound: .bundled("winter_wind_sound.mp3"),
                 enemySpawnSound: .bundled("enemy_start_sound.mp3"),

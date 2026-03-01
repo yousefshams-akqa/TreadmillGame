@@ -30,8 +30,13 @@ struct Level: Codable, Hashable, Identifiable {
     
     // MARK: - Enemies
     
-    /// Enemy configurations for this level
-    let enemies: [EnemyConfig]
+    /// Optional explicit number of enemies for this level.
+    /// If missing, a count is derived from step goal and difficulty.
+    let enemyCount: Int?
+    
+    /// Optional static enemy configurations for this level.
+    /// Kept for backwards compatibility with older JSON files.
+    let enemies: [EnemyConfig]?
     
     // MARK: - Audio
     

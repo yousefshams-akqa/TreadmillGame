@@ -10,10 +10,10 @@ struct Difficulty: Codable, Hashable {
     /// This is a constant used to ensure the catch grace never feels instant.
     static let treadmillResponseSeconds: Double = 1.0
 
-    let easy: String = "easy"
-    let medium: String = "medium"
-    let hard: String = "hard"
-    let extreme: String = "extreme"
+    static let easy: String = "easy"
+    static let medium: String = "medium"
+    static let hard: String = "hard"
+    static let extreme: String = "extreme"
     
     init(_ value: String) {
         self.rawValue = value.lowercased()
@@ -36,19 +36,19 @@ struct Difficulty: Codable, Hashable {
     }
 
     var isEasy: Bool {
-        rawValue == easy
+        rawValue == Difficulty.easy
     }
 
     /// Minimum enemy speed advantage in steps/second (Medium+ only).
     var enemyDeltaSps: Double {
         switch rawValue {
-        case easy:
+        case Difficulty.easy:
             return 0.0
-        case medium:
+        case Difficulty.medium:
             return 0.4
-        case hard:
+        case Difficulty.hard:
             return 0.7
-        case extreme:
+        case Difficulty.extreme:
             return 1.0
         default:
             return 0.0
@@ -60,13 +60,13 @@ struct Difficulty: Codable, Hashable {
     var minCatchGraceSeconds: Double {
         let bonus: Double
         switch rawValue {
-        case easy:
+        case Difficulty.easy:
             bonus = 1.5
-        case medium:
+        case Difficulty.medium:
             bonus = 1.0
-        case hard:
+        case Difficulty.hard:
             bonus = 0.5
-        case extreme:
+        case Difficulty.extreme:
             bonus = 0.0
         default:
             bonus = 1.0

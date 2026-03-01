@@ -95,7 +95,8 @@ private struct LevelCardButtonStyle: ButtonStyle {
                 stepGoal: 200,
                 timeLimit: nil,
                 defaultStrideLength: 0.726,
-                enemies: [],
+                enemyCount: 6,
+                enemies: nil,
                 audio: LevelAudio(
                     environmentSound: .bundled("test.mp3"),
                     enemySpawnSound: .bundled("test.mp3"),

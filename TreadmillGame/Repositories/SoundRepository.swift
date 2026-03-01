@@ -13,15 +13,7 @@ class SoundRepository {
     
     /// Initialize with default (bundled) audio - for backwards compatibility
     func initialize() {
-        // Use default bundled audio files
-        let defaultConfig = LevelAudio(
-            environmentSound: .bundled("winter_wind_sound.mp3"),
-            enemySpawnSound: .bundled("enemy_start_sound.mp3"),
-            enemyRunningSound: .bundled("enemy_running_sound.mp3"),
-            enemyGameOverSound: .bundled("enemy_game_over_sound.mp3"),
-            victorySound: .bundled("victory_sound.mp3")
-        )
-        initialize(with: defaultConfig)
+        initialize(with: .default)
     }
     
     /// Initialize with a specific audio configuration from a level

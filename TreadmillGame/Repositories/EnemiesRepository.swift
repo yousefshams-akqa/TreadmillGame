@@ -1,5 +1,5 @@
 import Foundation
-import SwiftUICore
+import SwiftUI
 import CoreHaptics
 import AVFAudio
 
@@ -92,6 +92,9 @@ class EnemiesRepository {
         soundRepo: SoundRepository
     ) {
         print("[EnemiesRepo] handleEnemyLifeCycle - playerSteps: \(playerSteps), hasEnemy: \(enemy != nil)")
+        if let enemy {
+            print("[EnemiesRepo] Speed check - playerSPS: \(String(format: "%.2f", playerStepsPerSecond)), enemySPS: \(String(format: "%.2f", enemy.stepsPerSecond))")
+        }
         
         // Check if a new enemy should spawn (even if one is already active)
         if shouldSpawnNextEnemy(playerSteps: playerSteps) {
@@ -183,6 +186,13 @@ class EnemiesRepository {
         
         let enemySteps = getEnemyCurrentSteps()
         print("[EnemiesRepo] Comparing - enemySteps: \(String(format: "%.2f", enemySteps)) vs playerSteps: \(playerSteps)")
+        if shouldDestroyEnemyBecausePlayerEscaped(enemySteps: enemySteps, playerSteps: playerSteps, difficulty: difficulty) {
+            print("[EnemiesRepo] Player escaped enemy by enough steps - destroying enemy")
+            destoryEnemy()
+            pauseHaptics()
+            soundRepo.stopEnemyRunningSound()
+            return
+        }
         if isGameOver(enemySteps: enemySteps, playerSteps: playerSteps, difficulty: difficulty) {
             print("[EnemiesRepo] GAME OVER! Enemy caught the player!")
             pauseHaptics()
@@ -239,11 +249,21 @@ class EnemiesRepository {
                 return false
             }
 
-            let configuredGrace = currentEnemyConfig?.catchMargin ?? 0
+            let configuredGrace = currentEnemyConfig?.catchMarginSeconds ?? 0
             let effectiveGraceSeconds = max(configuredGrace, difficulty.minCatchGraceSeconds)
             let elapsed = Date.now.timeIntervalSince(catchStartedAt ?? Date.now)
             return elapsed >= effectiveGraceSeconds
         }
+    }
+    
+    private func shouldDestroyEnemyBecausePlayerEscaped(
+        enemySteps: Double,
+        playerSteps: Int64,
+        difficulty: Difficulty
+    ) -> Bool {
+        let lead = Double(playerSteps) - enemySteps
+        let profile = DifficultyProfile.resolve(for: difficulty)
+        return lead >= profile.escapeDistanceSteps
     }
 
     private func effectiveEnemyConfig(from config: EnemyConfig, playerStepsPerSecond: Double, difficulty: Difficulty) -> EnemyConfig {
@@ -252,12 +272,11 @@ class EnemiesRepository {
 
         let playerSps = max(playerStepsPerSecond, 0.1)
         let hybridSps = (0.5 * playerSps) + (0.5 * config.stepsPerSecond)
-        let effectiveSps = max(config.stepsPerSecond, hybridSps, playerSps + difficulty.enemyDeltaSps)
+        let effectiveSps = max(config.stepsPerSecond, hybridSps)
         return EnemyConfig(
             spawnAtStep: config.spawnAtStep,
             maxSteps: config.maxSteps,
             stepsPerSecond: effectiveSps,
-            catchMargin: config.catchMargin
         )
     }
     
