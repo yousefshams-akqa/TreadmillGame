@@ -21,7 +21,7 @@ struct StartScreen: View {
             NavigationStack {
                 ScrollView {
                     VStack(spacing: AppSpacing.xxl) {
-                        Spacer().frame(height: AppSpacing.huge)
+                        Spacer().frame(height: AppSpacing.md)
                         
                         StartScreenHeader()
                         
